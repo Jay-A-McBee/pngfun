@@ -87,12 +87,14 @@ impl TryFrom<&[u8]> for Chunk {
         // to determine data length.
         let mut b_data = vec![0; bytes.len() - 12];
 
+        // grab length bytes
         reader.read_exact(&mut b_length)?;
+        // grab type bytes
         reader.read_exact(&mut b_type)?;
+        // grab data bytes
         reader.read_exact(&mut b_data)?;
+        // grab crc bytes
         reader.read_exact(&mut b_crc)?;
-
-        println!("type{:?}::crc{:?}", b_type, b_crc);
 
         match ChunkType::try_from(b_type) {
             Ok(chunk_type) => {

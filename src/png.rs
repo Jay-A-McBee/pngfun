@@ -92,7 +92,7 @@ impl TryFrom<&[u8]> for Png {
             reader.read_exact(&mut b_len)?;
 
             let data_length = u32::from_be_bytes(b_len);
-            // add 8 (4bytes type, 4bytes crc) to data length;
+            // add 8 (4bytes type, 4bytes crc) to data length
             let mut b_rest = vec![0; (data_length + 8) as usize];
             reader.read_exact(&mut b_rest)?;
 
@@ -119,7 +119,6 @@ impl fmt::Display for Png {
         });
         writeln!(f, "]",)?;
         write!(f, "}}",)?;
-
         Ok(())
     }
 }
@@ -228,7 +227,7 @@ mod tests {
 
         let error = png.unwrap_err().downcast().unwrap();
 
-        assert!(error == Box::new(ChunkError("Chunk bytes are invalids")));
+        assert!(error == Box::new(ChunkError("Chunk bytes are invalid")));
     }
 
     #[test]

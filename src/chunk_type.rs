@@ -14,18 +14,19 @@ pub struct ChunkType {
 }
 
 impl ChunkType {
+    /// returns Chunktype.chunk
     pub fn bytes(&self) -> [u8; 4] {
         self.chunk
     }
-
+    /// ChunkType.chunk[0] is_ascii_uppercase
     pub fn is_critical(&self) -> bool {
         self.chunk[0].is_ascii_uppercase()
     }
-
+    /// ChunkType.chunk[1] is_ascii_uppercase
     pub fn is_public(&self) -> bool {
         self.chunk[1].is_ascii_uppercase()
     }
-
+    /// ChunkType.chunk[3] is_ascii_lowercase
     pub fn is_safe_to_copy(&self) -> bool {
         self.chunk[3].is_ascii_lowercase()
     }
@@ -37,6 +38,7 @@ impl ChunkType {
     pub fn is_valid_byte(byte: u8) -> bool {
         byte.is_ascii_lowercase() || byte.is_ascii_uppercase()
     }
+
     pub fn is_valid(chunk: &[u8]) -> bool {
         ChunkType::is_reserved_bit_valid(chunk[2])
             && !chunk.iter().any(|b| !ChunkType::is_valid_byte(*b))
@@ -50,7 +52,7 @@ impl TryFrom<[u8; 4]> for ChunkType {
     fn try_from(chunk: [u8; 4]) -> Result<Self> {
         // println!("{:?}::isValid::{}", chunk, ChunkType::is_valid(&chunk));
         if !ChunkType::is_valid(&chunk) {
-            return Err(Box::new(ChunkError("Chunk bytes are invalids")));
+            return Err(Box::new(ChunkError("Chunk bytes are invalid")));
         }
 
         Ok(ChunkType { chunk })
