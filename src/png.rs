@@ -6,7 +6,7 @@ use std::io::{BufRead, BufReader, Read};
 use crate::{Error, Result};
 
 #[derive(Debug)]
-struct Png {
+pub struct Png {
     pub chunks: Vec<Chunk>,
 }
 
@@ -17,12 +17,12 @@ impl Png {
         Png { chunks }
     }
 
-    fn append_chunk(&mut self, chunk: Chunk) {
+    pub fn append_chunk(&mut self, chunk: Chunk) {
         let insert_idx = self.chunks.len() - 2;
         self.chunks.insert(insert_idx, chunk);
     }
 
-    fn remove_chunk(&mut self, chunk_type: &str) -> Option<Chunk> {
+    pub fn remove_chunk(&mut self, chunk_type: &str) -> Option<Chunk> {
         if let Some(idx) = self
             .chunks
             .iter()
@@ -58,7 +58,7 @@ impl Png {
             .find(|chunk| chunk_type == chunk.chunk_type().to_string())
     }
 
-    fn as_bytes(&self) -> Vec<u8> {
+    pub fn as_bytes(&self) -> Vec<u8> {
         Png::STANDARD_HEADER
             .iter()
             .copied()
