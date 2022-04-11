@@ -22,12 +22,9 @@ impl Commands {
         Ok(())
     }
 
-    fn convert_to_4_byte_array(val: &String) -> Result<[u8; 4]> {
+    fn convert_to_4_byte_array(val: &String) -> [u8; 4] {
         let bytes = val.as_bytes();
-        let mut reader = BufReader::new(bytes);
-        let mut ret = [0; 4];
-        reader.read_exact(&mut ret)?;
-        Ok(ret)
+        [bytes[0], bytes[1], bytes[2], bytes[3]]
     }
 
     pub fn encode(
@@ -39,7 +36,7 @@ impl Commands {
         let contents = Self::read_file(&file_path);
 
         if contents.is_ok() {
-            let b_chunk_type = Self::convert_to_4_byte_array(&chunk_type)?;
+            let b_chunk_type = Self::convert_to_4_byte_array(&chunk_type);
             let chunk_type = ChunkType::try_from(b_chunk_type)?;
             let chunk = Chunk::new(chunk_type, message.as_bytes().to_vec());
             let mut png = Png::try_from(contents.unwrap().as_slice())?;
