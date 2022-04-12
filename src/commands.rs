@@ -10,8 +10,6 @@ use crate::Result;
 pub enum CommandErrors {
     Encode(&'static str),
     Decode(&'static str),
-    Remove(&'static str),
-    Print(&'static str),
 }
 
 impl error::Error for CommandErrors {}
@@ -21,8 +19,6 @@ impl fmt::Display for CommandErrors {
         let error = match self {
             CommandErrors::Encode(msg) => msg,
             CommandErrors::Decode(msg) => msg,
-            CommandErrors::Remove(msg) => msg,
-            CommandErrors::Print(msg) => msg,
         };
 
         write!(f, "{}", error)
@@ -32,20 +28,19 @@ impl fmt::Display for CommandErrors {
 pub struct Commands;
 
 impl Commands {
-    fn read_file(file_path: &String) -> io::Result<Vec<u8>> {
-        let path = PathBuf::from(file_path);
-        fs::read(path)
-    }
-
     fn write_file(file_path: String, contents: Vec<u8>) -> io::Result<()> {
         let path_buf = PathBuf::from(file_path);
-        fs::write(path_buf, contents)?;
-        Ok(())
+        fs::write(path_buf, contents)
     }
 
     fn convert_to_4_byte_array(val: &String) -> [u8; 4] {
         let bytes = val.as_bytes();
         [bytes[0], bytes[1], bytes[2], bytes[3]]
+    }
+
+    fn convert_file_to_png(file_path: &String) -> Result<Png> {
+        let path_buf = PathBuf::from(file_path);
+        Png::try_from(path_buf)
     }
 
     pub fn encode(
@@ -54,13 +49,12 @@ impl Commands {
         message: &String,
         output_path: &Option<String>,
     ) -> Result<()> {
-        let contents = Self::read_file(&file_path)?;
+        let mut png = Self::convert_file_to_png(file_path)?;
 
         let b_chunk_type = Self::convert_to_4_byte_array(&chunk_type);
         let chunk_type = ChunkType::try_from(b_chunk_type)?;
         let chunk = Chunk::new(chunk_type, message.as_bytes().to_vec());
 
-        let mut png = Png::try_from(contents.as_slice())?;
         png.append_chunk(chunk);
 
         let write_path = output_path.as_ref().unwrap_or(file_path);
@@ -69,8 +63,7 @@ impl Commands {
     }
 
     pub fn decode(file_path: &String, chunk_type: &String) -> Result<()> {
-        let contents = Self::read_file(&file_path)?;
-        let png = Png::try_from(contents.as_slice())?;
+        let png = Self::convert_file_to_png(file_path)?;
 
         if let Some(chunk) = png.chunk_by_type(chunk_type.as_str()) {
             println!(
@@ -84,8 +77,7 @@ impl Commands {
     }
 
     pub fn remove(file_path: &String, chunk_type: &String) -> Result<()> {
-        let contents = Self::read_file(&file_path)?;
-        let mut png = Png::try_from(contents.as_slice())?;
+        let mut png = Self::convert_file_to_png(file_path)?;
 
         if let Some(chunk) = png.remove_chunk(chunk_type) {
             Self::write_file(file_path.to_string(), png.as_bytes())?;
@@ -100,8 +92,7 @@ impl Commands {
     }
 
     pub fn print(file_path: &String) -> Result<()> {
-        let contents = Self::read_file(&file_path)?;
-        let png = Png::try_from(contents.as_slice())?;
+        let png = Self::convert_file_to_png(file_path)?;
         let formatted_png = format!("{}", png);
 
         println!("________________________________________________\n");

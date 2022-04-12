@@ -1,11 +1,13 @@
 use crate::chunk::Chunk;
 use crate::chunk_error::ChunkError;
 use std::fmt;
+use std::fs;
 use std::io::{BufRead, BufReader, Read};
+use std::path::PathBuf;
 
 use crate::{Error, Result};
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Png {
     pub chunks: Vec<Chunk>,
 }
@@ -87,7 +89,7 @@ impl TryFrom<&[u8]> for Png {
     type Error = Error;
 
     fn try_from(bytes: &[u8]) -> Result<Self> {
-        // skip the header
+        // standard header
         let header = &bytes[0..8];
 
         let is_header_invalid = header
@@ -111,6 +113,15 @@ impl TryFrom<&[u8]> for Png {
         }
 
         Ok(Png { chunks })
+    }
+}
+
+impl TryFrom<PathBuf> for Png {
+    type Error = Error;
+
+    fn try_from(path: PathBuf) -> Result<Self> {
+        let contents = fs::read(path)?;
+        Png::try_from(contents.as_slice())
     }
 }
 
