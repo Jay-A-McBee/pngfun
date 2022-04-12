@@ -1,13 +1,14 @@
 use clap::Parser;
 
-mod args;
 mod chunk;
 mod chunk_error;
 mod chunk_type;
+mod cli;
 mod commands;
 mod png;
 
-use crate::args::{Cli, Command};
+use crate::cli::{Cli, Command};
+use crate::commands::Commands;
 
 pub type Error = Box<dyn std::error::Error>;
 pub type Result<T> = std::result::Result<T, Error>;
@@ -21,24 +22,16 @@ fn main() -> Result<()> {
             chunk_type,
             message,
             output_path,
-        } => {
-            todo!()
-        }
+        } => Commands::encode(file_path, chunk_type, message, output_path)?,
         Command::Decode {
             file_path,
             chunk_type,
-        } => {
-            todo!()
-        }
+        } => Commands::decode(file_path, chunk_type)?,
         Command::Remove {
             file_path,
             chunk_type,
-        } => {
-            todo!()
-        }
-        Command::Print { file_path } => {
-            todo!()
-        }
+        } => Commands::remove(file_path, chunk_type)?,
+        Command::Print { file_path } => Commands::print(file_path)?,
     }
 
     Ok(())

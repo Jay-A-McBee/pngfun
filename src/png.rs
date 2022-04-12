@@ -18,7 +18,7 @@ impl Png {
     }
 
     pub fn append_chunk(&mut self, chunk: Chunk) {
-        let insert_idx = self.chunks.len() - 2;
+        let insert_idx = self.chunks.len() - 1;
         self.chunks.insert(insert_idx, chunk);
     }
 
@@ -52,7 +52,23 @@ impl Png {
         &self.chunks
     }
 
-    fn chunk_by_type(&self, chunk_type: &str) -> Option<&Chunk> {
+    pub fn get_bytes(reader: &mut BufReader<&[u8]>) -> Result<Vec<u8>> {
+        let mut b_length = [0; 4];
+        reader.read_exact(&mut b_length)?;
+        let data_length = u32::from_be_bytes(b_length);
+
+        // add 8 (4bytes type, 4bytes crc) to data length
+        let mut b_rest = vec![0; (data_length + 8) as usize];
+        reader.read_exact(&mut b_rest)?;
+
+        Ok(b_length
+            .iter()
+            .chain(b_rest.iter())
+            .copied()
+            .collect::<Vec<u8>>())
+    }
+
+    pub fn chunk_by_type(&self, chunk_type: &str) -> Option<&Chunk> {
         self.chunks()
             .iter()
             .find(|chunk| chunk_type == chunk.chunk_type().to_string())
@@ -88,21 +104,9 @@ impl TryFrom<&[u8]> for Png {
         let mut reader = BufReader::new(&bytes[8..]);
 
         while !reader.fill_buf()?.is_empty() {
-            let mut b_len = [0; 4];
-            reader.read_exact(&mut b_len)?;
-
-            let data_length = u32::from_be_bytes(b_len);
-            // add 8 (4bytes type, 4bytes crc) to data length
-            let mut b_rest = vec![0; (data_length + 8) as usize];
-            reader.read_exact(&mut b_rest)?;
-
-            let byte_seq = b_len
-                .iter()
-                .chain(b_rest.iter())
-                .copied()
-                .collect::<Vec<u8>>();
-
+            let byte_seq = Png::get_bytes(&mut reader)?;
             let chunk = Chunk::try_from(byte_seq.as_slice())?;
+
             chunks.push(chunk);
         }
 

@@ -55,8 +55,34 @@ impl Chunk {
     }
 
     pub fn data_as_string(&self) -> Result<String> {
-        let data = str::from_utf8(&self.data).unwrap();
+        let data = str::from_utf8(&self.data)?;
         Ok(data.to_string())
+    }
+
+    fn get_data_length(reader: &mut io::BufReader<&[u8]>) -> Result<usize> {
+        let mut b_length = [0; 4];
+        reader.read_exact(&mut b_length)?;
+        Ok(u32::from_be_bytes(b_length) as usize)
+    }
+
+    fn get_byte_sequences(
+        reader: &mut io::BufReader<&[u8]>,
+    ) -> Result<([u8; 4], Vec<u8>, [u8; 4])> {
+        // read first 4 data bytes and convert to bigendian bytes
+        let data_length = Chunk::get_data_length(reader)?;
+
+        let mut b_data = vec![0; data_length];
+        let mut b_type = [0; 4];
+        let mut b_crc = [0; 4];
+
+        // grab type bytes
+        reader.read_exact(&mut b_type)?;
+        // grab data bytes
+        reader.read_exact(&mut b_data)?;
+        // grab crc bytes
+        reader.read_exact(&mut b_crc)?;
+
+        Ok((b_type, b_data, b_crc))
     }
 
     pub fn as_bytes(&self) -> Vec<u8> {
@@ -77,38 +103,19 @@ impl TryFrom<&[u8]> for Chunk {
     type Error = Error;
 
     fn try_from(bytes: &[u8]) -> Result<Self> {
-        println!("bytes{:?}", bytes);
-
         let mut reader = io::BufReader::new(bytes);
-        let mut b_length = [0; 4];
-        let mut b_type = [0; 4];
-        let mut b_crc = [0; 4];
-        // subtract known 4 byte sections (length, chunk_type, crc) from total length
-        // to determine data length.
-        let mut b_data = vec![0; bytes.len() - 12];
 
-        // grab length bytes
-        reader.read_exact(&mut b_length)?;
-        // grab type bytes
-        reader.read_exact(&mut b_type)?;
-        // grab data bytes
-        reader.read_exact(&mut b_data)?;
-        // grab crc bytes
-        reader.read_exact(&mut b_crc)?;
+        let (b_type, b_data, b_crc) = Chunk::get_byte_sequences(&mut reader)?;
 
-        match ChunkType::try_from(b_type) {
-            Ok(chunk_type) => {
-                let chunk = Chunk::new(chunk_type, b_data);
+        let chunk_type = ChunkType::try_from(b_type)?;
 
-                if chunk.crc() != u32::from_be_bytes(b_crc) {
-                    // println!("in crc failure {:?}", chunk);
-                    return Err(Box::new(ChunkError("Crc does not match")));
-                }
+        let chunk = Chunk::new(chunk_type, b_data);
 
-                Ok(chunk)
-            }
-            Err(msg) => Err(msg),
+        if chunk.crc() != u32::from_be_bytes(b_crc) {
+            return Err(Box::new(ChunkError("Crc does not match")));
         }
+
+        Ok(chunk)
     }
 }
 

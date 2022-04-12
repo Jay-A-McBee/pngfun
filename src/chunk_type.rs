@@ -35,13 +35,13 @@ impl ChunkType {
         byte.is_ascii_uppercase()
     }
 
-    pub fn is_valid_byte(byte: u8) -> bool {
+    pub fn is_valid_byte(byte: &u8) -> bool {
         byte.is_ascii_lowercase() || byte.is_ascii_uppercase()
     }
 
     pub fn is_valid(chunk: &[u8]) -> bool {
         ChunkType::is_reserved_bit_valid(chunk[2])
-            && !chunk.iter().any(|b| !ChunkType::is_valid_byte(*b))
+            && !chunk.iter().any(|b| !ChunkType::is_valid_byte(b))
     }
 }
 
@@ -50,7 +50,6 @@ impl error::Error for ChunkType {}
 impl TryFrom<[u8; 4]> for ChunkType {
     type Error = Error;
     fn try_from(chunk: [u8; 4]) -> Result<Self> {
-        // println!("{:?}::isValid::{}", chunk, ChunkType::is_valid(&chunk));
         if !ChunkType::is_valid(&chunk) {
             return Err(Box::new(ChunkError("Chunk bytes are invalid")));
         }
