@@ -24,7 +24,7 @@ cargo run help
 cargo run help <encode|decode|remove|print>
 ```
 
-Or if you'd like to cut to the chase, you need 1 png file to ride this ride.
+Or if you'd like to cut to the chase - you need 1 png file to ride this ride.
 
 ```
 cargo run encode <path to png> rUST  "This is the hidden message" <optional output path>
