@@ -19,17 +19,23 @@ ___________________________________________________________________
 
 Clone away if you want to engage in some pointless png manipulation
 
-`cargo run help` 
-`cargo run help <encode|decode|remove|print>`
+```
+cargo run help
+cargo run help <encode|decode|remove|print>
+```
 
 Or if you'd like to cut to the chase, you need 1 png file to ride this ride.
 
-`cargo run encode <path to png> rUST  "This is the hidden message" <optional output path>`
-`cargo run decode <path to png> rUST`
-`cargo run print <path to png>`
-`cargo run remove <path to png> rUST`
+```
+cargo run encode <path to png> rUST  "This is the hidden message" <optional output path>
+cargo run decode <path to png> rUST
+cargo run print <path to png>
+cargo run remove <path to png> rUST
+```
 
 This can be installed as a binary in your CWD (I doubt you want to do that 🤷) 
-`cargo install --path`
-`pngsneak help`
-`pngsneak help <encode|decode|remove|print>`
+```
+cargo install --path
+pngsneak help
+pngsneak help <encode|decode|remove|print>
+```
