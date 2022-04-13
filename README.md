@@ -1,6 +1,6 @@
 ## pngsneak
 ##### CLI tool for hiding messages in png files
-##### encode, decode, remove and print to your hearts content 💖
+##### encode, decode, remove and print to your heart's content 💖
 
 [Background](https://picklenerd.github.io/pngme_book/chapter_1.html])
 
