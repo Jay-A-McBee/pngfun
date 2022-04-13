@@ -10,9 +10,8 @@ length bytes   type bytes           data bytes                 crc bytes
 [L,L,L,L,       T,T,T,T,    D,D,D,D,D,D,D,D,D,D,D,D,D,D,D,     C,C,C,C]
 ```
 
-Converting the first four bytes (length bytes) to u32 gives us the length of the data bytes.
-The type bytes are upper/lowercase ascii bytes that impart information
-about the chunk. See PNG file spec [section 3.3.](http://www.libpng.org/pub/png/spec/1.2/PNG-Structure.html#PNG-file-signature) for more info about chunk type bytes.
+We derive the data byte's length by converting the first four bytes (length bytes) to a 32 bit integer.
+The type bytes are upper/lowercase ascii bytes that impart informationabout the chunk. See PNG file spec [section 3.3.](http://www.libpng.org/pub/png/spec/1.2/PNG-Structure.html#PNG-file-signature) for more info about chunk type bytes.
 
 By using type and data bytes we can create our own chunks and embed text in png files. This is something you will probably NEVER need to do 😝
 ___________________________________________________________________
