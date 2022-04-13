@@ -14,7 +14,7 @@ Converting the first four bytes (length bytes) to u32 gives us the length of the
 The type bytes are upper/lowercase ascii bytes that impart information
 about the chunk. See PNG file spec [section 3.3.](http://www.libpng.org/pub/png/spec/1.2/PNG-Structure.html#PNG-file-signature) for more info about chunk type bytes.
 
-By using type and data bytes we can create our own chunds and embed text in png files. This is something you will probably NEVER need to do 😝
+By using type and data bytes we can create our own chunks and embed text in png files. This is something you will probably NEVER need to do 😝
 ___________________________________________________________________
 
 Clone away if you want to engage in some pointless png manipulation
