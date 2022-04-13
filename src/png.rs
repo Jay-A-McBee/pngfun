@@ -14,7 +14,7 @@ pub struct Png {
 
 impl Png {
     pub const STANDARD_HEADER: [u8; 8] = [137, 80, 78, 71, 13, 10, 26, 10];
-
+    #[allow(dead_code)]
     fn from_chunks(chunks: Vec<Chunk>) -> Self {
         Png { chunks }
     }
@@ -46,6 +46,7 @@ impl Png {
         }
     }
 
+    #[allow(dead_code)]
     fn header(&self) -> &[u8; 8] {
         &Self::STANDARD_HEADER
     }
@@ -129,9 +130,9 @@ impl fmt::Display for Png {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         writeln!(f, "Png {{ ",)?;
         writeln!(f, "   chunks: [",)?;
-        self.chunks.iter().for_each(|chunk| {
-            writeln!(f, "{}", chunk.to_string());
-        });
+        for chunk in self.chunks.iter() {
+            writeln!(f, "{}", chunk.to_string())?;
+        }
         writeln!(f, "]",)?;
         write!(f, "}}",)?;
         Ok(())
@@ -144,7 +145,6 @@ mod tests {
     use crate::chunk::Chunk;
     use crate::chunk_type::ChunkType;
     use std::convert::TryFrom;
-    use std::str::FromStr;
 
     fn testing_chunks() -> Vec<Chunk> {
         let mut chunks = Vec::new();
@@ -293,6 +293,7 @@ mod tests {
     }
 
     #[test]
+    #[allow(unused_variables)]
     fn test_png_trait_impls() {
         let chunk_bytes: Vec<u8> = testing_chunks()
             .into_iter()
@@ -306,13 +307,12 @@ mod tests {
             .collect();
 
         let png: Png = TryFrom::try_from(bytes.as_ref()).unwrap();
-
         let png_string = format!("{}", png);
 
         // println!("{}", png_string);
     }
 
-    //     // This is the raw bytes for a shrunken version of the `dice.png` image on Wikipedia
+    // This is the raw bytes for a shrunken version of the `dice.png` image on Wikipedia
     const PNG_FILE: [u8; 4803] = [
         137, 80, 78, 71, 13, 10, 26, 10, 0, 0, 0, 13, 73, 72, 68, 82, 0, 0, 0,
         50, 0, 0, 0, 50, 8, 6, 0, 0, 0, 30, 63, 136, 177, 0, 0, 0, 1, 115, 82,

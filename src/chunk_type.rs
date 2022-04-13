@@ -12,7 +12,7 @@ use crate::{Error, Result};
 pub struct ChunkType {
     chunk: [u8; 4],
 }
-
+#[allow(dead_code)]
 impl ChunkType {
     /// returns Chunktype.chunk
     pub fn bytes(&self) -> [u8; 4] {

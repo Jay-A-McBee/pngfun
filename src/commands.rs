@@ -7,6 +7,7 @@ use crate::png::Png;
 use crate::Result;
 
 #[derive(Debug)]
+#[allow(dead_code)]
 pub enum CommandErrors {
     Encode(&'static str),
     Decode(&'static str),

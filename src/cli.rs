@@ -1,4 +1,4 @@
-use clap::{Args, Parser, Subcommand};
+use clap::{Parser, Subcommand};
 #[derive(Parser)]
 #[clap(author, version, about, long_about = None)]
 pub struct Cli {
@@ -23,7 +23,7 @@ pub enum Command {
     Decode {
         /// relative path of png file
         file_path: String,
-        /// 4 ascii character string chunk type ex. RuST
+        /// 4 ascii character string chunk type ex. tEXT
         chunk_type: String,
     },
 
