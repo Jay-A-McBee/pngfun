@@ -29,8 +29,8 @@ Or if you'd like to cut to the chase - you need 1 png file to ride this ride.
 ```
 cargo run encode <path to png> rUST  "This is the hidden message" <optional output path>
 cargo run decode <path to png> rUST
-cargo run print <path to png>
 cargo run remove <path to png> rUST
+cargo run print  <path to png>
 ```
 
 This can be installed as a binary in your CWD (I doubt you want to do that 🤷) 
