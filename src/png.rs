@@ -71,10 +71,11 @@ impl Png {
             .collect::<Vec<u8>>())
     }
 
-    pub fn chunk_by_type(&self, chunk_type: &str) -> Option<&Chunk> {
+    pub fn chunk_by_type(&self, chunk_type: &str) -> Vec<&Chunk> {
         self.chunks()
             .iter()
-            .find(|chunk| chunk_type == chunk.chunk_type().to_string())
+            .filter(|chunk| chunk_type == chunk.chunk_type().to_string())
+            .collect::<Vec<&Chunk>>()
     }
 
     pub fn as_bytes(&self) -> Vec<u8> {
@@ -102,9 +103,9 @@ impl TryFrom<&[u8]> for Png {
             return Err(Box::new(ChunkError("Header bytes are invalid")));
         }
 
-        let mut chunks = vec![];
         // skip header
         let mut reader = BufReader::new(&bytes[8..]);
+        let mut chunks = vec![];
 
         while !reader.fill_buf()?.is_empty() {
             let byte_seq = Png::get_bytes(&mut reader)?;
@@ -126,10 +127,18 @@ impl TryFrom<PathBuf> for Png {
     }
 }
 
+impl TryFrom<Url> for Png {
+    type Error = Error;
+
+    fn try_from(url: Url) -> Result<Self> {
+        todo!()
+    }
+}
+
 impl fmt::Display for Png {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        writeln!(f, "Png {{ ",)?;
-        writeln!(f, "   chunks: [",)?;
+        writeln!(f, "Png {{\n",)?;
+        writeln!(f, "chunks: [\n",)?;
         for chunk in self.chunks.iter() {
             writeln!(f, "{}", chunk.to_string())?;
         }
@@ -255,18 +264,18 @@ mod tests {
     #[test]
     fn test_chunk_by_type() {
         let png = testing_png();
-        let chunk = png.chunk_by_type("FrSt").unwrap();
-        assert_eq!(&chunk.chunk_type().to_string(), "FrSt");
-        assert_eq!(&chunk.data_as_string().unwrap(), "I am the first chunk");
+        let chunk = png.chunk_by_type("FrSt");
+        assert_eq!(&chunk[0].chunk_type().to_string(), "FrSt");
+        assert_eq!(&chunk[0].data_as_string().unwrap(), "I am the first chunk");
     }
 
     #[test]
     fn test_append_chunk() {
         let mut png = testing_png();
         png.append_chunk(chunk_from_strings("TeSt", "Message").unwrap());
-        let chunk = png.chunk_by_type("TeSt").unwrap();
-        assert_eq!(&chunk.chunk_type().to_string(), "TeSt");
-        assert_eq!(&chunk.data_as_string().unwrap(), "Message");
+        let chunk = png.chunk_by_type("TeSt");
+        assert_eq!(&chunk[0].chunk_type().to_string(), "TeSt");
+        assert_eq!(&chunk[0].data_as_string().unwrap(), "Message");
     }
 
     #[test]
@@ -275,7 +284,7 @@ mod tests {
         png.append_chunk(chunk_from_strings("TeSt", "Message").unwrap());
         png.remove_chunk("TeSt").unwrap();
         let chunk = png.chunk_by_type("TeSt");
-        assert!(chunk.is_none());
+        assert!(chunk.is_empty());
     }
 
     #[test]
