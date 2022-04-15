@@ -5,6 +5,7 @@ use crate::chunk::Chunk;
 use crate::chunk_type::ChunkType;
 use crate::png::Png;
 use crate::Result;
+use reqwest::blocking::Client;
 
 pub enum FileType {
     Local(String),
@@ -30,8 +31,9 @@ impl fmt::Display for CommandErrors {
         write!(f, "{}", error)
     }
 }
+
 #[derive(Debug)]
-pub struct Commands;
+pub struct Commands {}
 
 impl Commands {
     /// Writes the altered png contents to disk.
@@ -52,7 +54,11 @@ impl Commands {
     ///
     ///
     fn convert_url_to_png(url: &String) -> Result<Png> {
-        todo!()
+        println!("\nMaking a request to {}", url);
+        let client = Client::new();
+        let resp = client.get(url).send()?;
+        let bytes = resp.bytes()?.to_vec();
+        Png::try_from(bytes.as_slice())
     }
 
     /// Converts a local png file to a Png struct.
@@ -68,20 +74,19 @@ impl Commands {
     ///
     /// Not Async -> TODO: Make this async
     fn convert_to_png(file_path: &String) -> Result<Png> {
-        match Self::get_file_path_type(file_path) {
+        match Self::convert_to_file_type(file_path) {
             FileType::Url(url) => Self::convert_url_to_png(file_path),
             FileType::Local(file) => Self::convert_file_to_png(&file),
         }
     }
 
     /// Converts passed file_path arg to FileType enum variant.
-    fn get_file_path_type(file_path: &String) -> FileType {
-        if file_path.starts_with("http://") || file_path.starts_with("https://")
-        {
-            return FileType::Url(file_path);
+    fn convert_to_file_type(file_path: &String) -> FileType {
+        if file_path.starts_with("http") || file_path.starts_with("https") {
+            return FileType::Url(file_path.to_string());
         }
 
-        FileType::Local(file_path)
+        FileType::Local(file_path.to_string())
     }
 
     /// Encodes the passed message into the png file
@@ -96,7 +101,7 @@ impl Commands {
         message: &String,
         output_path: &Option<String>,
     ) -> Result<()> {
-        let mut png = Self::convert_file_to_png(file_path)?;
+        let mut png = Self::convert_to_png(file_path)?;
 
         let b_chunk_type = Self::convert_to_4_byte_array(&chunk_type);
         let chunk_type = ChunkType::try_from(b_chunk_type)?;
@@ -113,7 +118,7 @@ impl Commands {
     ///
     /// Prints the text contained in each chunk or not found message.
     pub fn decode(file_path: &String, chunk_type: &String) -> Result<()> {
-        let png = Self::convert_file_to_png(file_path)?;
+        let png = Self::convert_to_png(file_path)?;
 
         let found = png.chunk_by_type(chunk_type.as_str());
 
@@ -157,7 +162,7 @@ impl Commands {
 
     /// Prints the contents of png file as Chunks
     pub fn print(file_path: &String) -> Result<()> {
-        let png = Self::convert_file_to_png(file_path)?;
+        let png = Self::convert_to_png(file_path)?;
         let formatted_png = format!("{}", png);
 
         println!("________________________________________________\n");

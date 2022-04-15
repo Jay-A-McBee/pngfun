@@ -127,13 +127,13 @@ impl TryFrom<PathBuf> for Png {
     }
 }
 
-impl TryFrom<Url> for Png {
-    type Error = Error;
+// impl TryFrom<Url> for Png {
+//     type Error = Error;
 
-    fn try_from(url: Url) -> Result<Self> {
-        todo!()
-    }
-}
+//     fn try_from(url: Url) -> Result<Self> {
+//         todo!()
+//     }
+// }
 
 impl fmt::Display for Png {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
