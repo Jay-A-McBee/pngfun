@@ -5,6 +5,7 @@ mod chunk_error;
 mod chunk_type;
 mod cli;
 mod commands;
+mod file_type;
 mod png;
 
 use crate::cli::{Cli, Command};

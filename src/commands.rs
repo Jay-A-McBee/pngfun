@@ -3,14 +3,10 @@ use std::{error, fmt, fs, io};
 
 use crate::chunk::Chunk;
 use crate::chunk_type::ChunkType;
+use crate::file_type::FileType;
 use crate::png::Png;
 use crate::Result;
-use reqwest::blocking::Client;
-
-pub enum FileType {
-    Local(String),
-    Url(String),
-}
+use reqwest::blocking::get;
 
 #[derive(Debug)]
 #[allow(dead_code)]
@@ -54,17 +50,9 @@ impl Commands {
     ///
     ///
     fn convert_url_to_png(url: &String) -> Result<Png> {
-        println!("\nMaking a request to {}", url);
-        let client = Client::new();
-        let resp = client.get(url).send()?;
-        let bytes = resp.bytes()?.to_vec();
+        println!("\nGET to ------> {}", url);
+        let bytes = get(url)?.bytes()?.to_vec();
         Png::try_from(bytes.as_slice())
-    }
-
-    /// Converts a local png file to a Png struct.
-    fn convert_file_to_png(file_path: &String) -> Result<Png> {
-        let path_buf = PathBuf::from(file_path);
-        Png::try_from(path_buf)
     }
 
     /// Convert passed file_path arg to a Png.
@@ -74,19 +62,10 @@ impl Commands {
     ///
     /// Not Async -> TODO: Make this async
     fn convert_to_png(file_path: &String) -> Result<Png> {
-        match Self::convert_to_file_type(file_path) {
-            FileType::Url(url) => Self::convert_url_to_png(file_path),
-            FileType::Local(file) => Self::convert_file_to_png(&file),
+        match FileType::from(file_path.to_string()) {
+            FileType::Url(url) => Self::convert_url_to_png(&url),
+            FileType::Local(file) => Png::try_from(file),
         }
-    }
-
-    /// Converts passed file_path arg to FileType enum variant.
-    fn convert_to_file_type(file_path: &String) -> FileType {
-        if file_path.starts_with("http") || file_path.starts_with("https") {
-            return FileType::Url(file_path.to_string());
-        }
-
-        FileType::Local(file_path.to_string())
     }
 
     /// Encodes the passed message into the png file
@@ -123,9 +102,7 @@ impl Commands {
         let found = png.chunk_by_type(chunk_type.as_str());
 
         if found.is_empty() {
-            return Err(Box::new(CommandErrors::Decode(
-                "chunk_type not found.",
-            )));
+            return Err(Box::new(CommandErrors::Decode("chunk_type not found.")));
         }
 
         let messages = found
@@ -146,15 +123,13 @@ impl Commands {
     ///
     /// Prints removed chunk or not found message.
     pub fn remove(file_path: &String, chunk_type: &String) -> Result<()> {
-        let mut png = Self::convert_file_to_png(file_path)?;
+        let mut png = Self::convert_to_png(file_path)?;
 
         if let Some(chunk) = png.remove_chunk(chunk_type) {
             Self::write_file(file_path.to_string(), png.as_bytes())?;
             println!("Removed the following chunk:\n{}", chunk.to_string());
         } else {
-            return Err(Box::new(CommandErrors::Decode(
-                "chunk_type not found.",
-            )));
+            return Err(Box::new(CommandErrors::Decode("chunk_type not found.")));
         }
 
         Ok(())

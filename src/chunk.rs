@@ -140,8 +140,7 @@ mod tests {
     fn testing_chunk() -> Chunk {
         let data_length: u32 = 42;
         let chunk_type = "RuSt".as_bytes();
-        let message_bytes =
-            "This is where your secret message will be!".as_bytes();
+        let message_bytes = "This is where your secret message will be!".as_bytes();
         let crc: u32 = 2882656334;
 
         let chunk_data: Vec<u8> = data_length
@@ -197,8 +196,7 @@ mod tests {
     fn test_valid_chunk_from_bytes() {
         let data_length: u32 = 42;
         let chunk_type = "RuSt".as_bytes();
-        let message_bytes =
-            "This is where your secret message will be!".as_bytes();
+        let message_bytes = "This is where your secret message will be!".as_bytes();
         let crc: u32 = 2882656334;
 
         let chunk_data: Vec<u8> = data_length
@@ -226,8 +224,7 @@ mod tests {
     fn test_invalid_chunk_from_bytes() {
         let data_length: u32 = 42;
         let chunk_type = "RuSt".as_bytes();
-        let message_bytes =
-            "This is where your secret message will be!".as_bytes();
+        let message_bytes = "This is where your secret message will be!".as_bytes();
         let crc: u32 = 2882656333;
 
         let chunk_data: Vec<u8> = data_length
@@ -248,8 +245,7 @@ mod tests {
     pub fn test_chunk_trait_impls() {
         let data_length: u32 = 42;
         let chunk_type = "RuSt".as_bytes();
-        let message_bytes =
-            "This is where your secret message will be!".as_bytes();
+        let message_bytes = "This is where your secret message will be!".as_bytes();
         let crc: u32 = 2882656334;
 
         let chunk_data: Vec<u8> = data_length
